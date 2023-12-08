@@ -18,6 +18,7 @@ contract LoanAccount is Ownable, IERC721Receiver {
         address _token_contract;
         uint256 _disbursed_amount;
         uint256 _principal_repaid;
+        uint256 _no_of_payments;
     }
 
     address public _lender;
@@ -45,7 +46,7 @@ contract LoanAccount is Ownable, IERC721Receiver {
 
         _lender = lender;
         _borrower = borrower;
-        _disbursed_token_asset = DisbursedTokenAsset(token_contract, 0, 0);
+        _disbursed_token_asset = DisbursedTokenAsset(token_contract, 0, 0, 0);
     }
 
     function disburse_loan(
@@ -106,7 +107,6 @@ contract LoanAccount is Ownable, IERC721Receiver {
 
     function deduct_emi() onlyOwner() external {
         IERC20 _token = IERC20(_disbursed_token_asset._token_contract);
-        uint256 _outstanding_loan_balance = _disbursed_token_asset._disbursed_amount - _disbursed_token_asset._principal_repaid;
         uint256 _payment = calculate_emi();
         if(_payment == 0) {
             IERC721(_mortgaged_asset._token_contract).safeTransferFrom(address(this), _borrower, _mortgaged_asset._token_id);
@@ -114,8 +114,9 @@ contract LoanAccount is Ownable, IERC721Receiver {
         }
         if (_token.balanceOf(_borrower) >= _payment && _token.allowance(_borrower, address(this)) >= _payment) {
             _token.transferFrom(_borrower, _lender, _payment);
-            _disbursed_token_asset._principal_repaid += _payment - ((_outstanding_loan_balance * _interest_rate) / (10000 * (_time_period / _payment_interval)));
-            _time_period--;
+            _disbursed_token_asset._principal_repaid += _payment - ((_disbursed_token_asset._disbursed_amount * _interest_rate) / (10000 * (_time_period / _payment_interval)));
+            _disbursed_token_asset._no_of_payments++;
+            _payment_defaults = 0;
         } else {
             if (_payment_defaults < 5) {
                 _payment_defaults++;
@@ -127,8 +128,12 @@ contract LoanAccount is Ownable, IERC721Receiver {
 
     function calculate_emi() public view returns (uint256) {
         uint256 _no_of_payments = _time_period / _payment_interval;
-        uint256 _interest = (uint256(10001) + _interest_rate) ** _no_of_payments;
-        uint256 _emi = ((_disbursed_token_asset._disbursed_amount - _disbursed_token_asset._principal_repaid) * (_interest / (_interest - 1)) * _interest_rate) / 10000;
+        if (_disbursed_token_asset._no_of_payments == _no_of_payments) {
+            return 0;
+        }
+        uint256 _numerator = (10000 + uint256(_interest_rate)) ** _no_of_payments;
+        uint256 _denominator = ((10000 + uint256(_interest_rate)) ** _no_of_payments) - (10000 ** _no_of_payments);
+        uint256 _emi = (_disbursed_token_asset._disbursed_amount * uint256(_interest_rate) * _numerator) / _denominator; 
         uint256 _payment = (_emi * (110 ** _payment_defaults)) / (100 ** _payment_defaults);
         return _payment;
     }
@@ -152,17 +157,6 @@ contract LoanAccount is Ownable, IERC721Receiver {
         _token.transfer(_lender, _token.balanceOf(address(this)));
         _asset.safeTransferFrom(address(this), _lender, _mortgaged_asset._token_id);
         
-    }
-
-    function prepayment(uint256 _amount) onlyOwner() external {
-        IERC20 _token = IERC20(_disbursed_token_asset._token_contract);
-        require(_msgSender() == _borrower, "Only borrower is allowed to do repayment.");
-        require(
-            (_token.allowance(_borrower, address(this)) >= _amount && _token.balanceOf(_borrower) >= _amount), 
-            "Insufficient balance or allowance."
-        );
-        _token.transferFrom(_borrower, _lender, _amount);
-        _disbursed_token_asset._principal_repaid += _amount;
     }
 
     function onERC721Received(

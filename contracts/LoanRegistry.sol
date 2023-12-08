@@ -87,12 +87,6 @@ contract LoanRegistry is AccessControl, AutomationCompatible {
         check_loan(_loan_account);
     }
 
-    function prepayment(address _account, uint256 _amount) external {
-        LoanAccount _loan_account = LoanAccount(_account);
-        _loan_account.prepayment(_amount);
-        check_loan(_loan_account);
-    }
-
     function check_loan(LoanAccount _loan_account) internal {
         if (_loan_account.calculate_emi() <= 0) {
             AutomationRegistrarInterface(_automation_registrar_address).cancelUpkeep(_upkeep_ids[address(_loan_account)]);
