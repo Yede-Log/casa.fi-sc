@@ -131,9 +131,8 @@ contract LoanAccount is Ownable, IERC721Receiver {
         if (_disbursed_token_asset._no_of_payments == _no_of_payments) {
             return 0;
         }
-        uint256 _numerator = (10000 + uint256(_interest_rate)) ** _no_of_payments;
-        uint256 _denominator = ((10000 + uint256(_interest_rate)) ** _no_of_payments) - (10000 ** _no_of_payments);
-        uint256 _emi = (_disbursed_token_asset._disbursed_amount * uint256(_interest_rate) * _numerator) / _denominator; 
+        uint256 _interest = (_interest_rate * _disbursed_token_asset._disbursed_amount) / 10000;
+        uint256 _emi = (_disbursed_token_asset._disbursed_amount + _interest) / _no_of_payments; 
         uint256 _payment = (_emi * (110 ** _payment_defaults)) / (100 ** _payment_defaults);
         return _payment;
     }

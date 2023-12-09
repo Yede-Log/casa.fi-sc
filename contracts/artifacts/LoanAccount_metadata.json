@@ -487,11 +487,11 @@
 			]
 		},
 		"contracts/LoanAccount.sol": {
-			"keccak256": "0x5210432ce35cf9989f7d9f406c9f50af5d7a5c5f96afd91bb9ba1ff0e1802f9f",
+			"keccak256": "0x960598100905aa85793b2fcebed59c16b1b96b05ce46e5b3625b09b63217421b",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://e11cf4c14dd648e954b2ccd94c52a9eb857d622d4ead1a65b8c0ace9669da079",
-				"dweb:/ipfs/QmdxTNamS9yAfHxzYsJ7qquc62rGdTyY8Jj3W2WxbAe9DQ"
+				"bzz-raw://39e02e5b637cf634628529c61aa10bcdcef503384d0aa0242a3d9ab15b18e29c",
+				"dweb:/ipfs/QmVJJMcnCYBzxDnft7Avhtnx6vKbRBYPoQspc8pcJecozs"
 			]
 		}
 	},

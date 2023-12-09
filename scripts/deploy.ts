@@ -25,12 +25,12 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log(`Deploying from account : ${deployer.address}`);
 
-    // const reaEstateNft = await ethers.deployContract("RealEstateNft", [], {});
-    // await reaEstateNft.waitForDeployment();
-    // console.log(
-    //     `Real Estate Nft contract address is ${reaEstateNft.target}` // 0x7064d0e8BAa9970945BC9f207bcA1C8d2F1919cA
-    // );
-    // await saveContract("RealEstateNft", reaEstateNft);
+    const reaEstateNft = await ethers.deployContract("RealEstateNft", [], {});
+    await reaEstateNft.waitForDeployment();
+    console.log(
+        `Real Estate Nft contract address is ${reaEstateNft.target}` // 0x7064d0e8BAa9970945BC9f207bcA1C8d2F1919cA
+    );
+    await saveContract("RealEstateNft", reaEstateNft);
 
     // const token = await ethers.deployContract("RENToken", [100_000_000_000_000], {});
     // await token.waitForDeployment();
